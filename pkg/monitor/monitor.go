@@ -6,12 +6,14 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/windowmonitor/pkg/notification"
 	"github.com/windowmonitor/pkg/storage"
 	"golang.org/x/sys/windows"
 )
 
 type WindowMonitor struct {
 	db *storage.Storage
+	notifier *notification.WindowsNotifier
 	lastWindow string
 	lastTime time.Time
 }
@@ -23,8 +25,10 @@ var (
 )
 
 func NewWindowMonitor(db *storage.Storage) *WindowMonitor {
+	notifier := notification.NewWindowsNotifier(db)
 	return &WindowMonitor{
 		db: db,
+		notifier: notifier,
 		lastTime: time.Now(),
 	}
 }
@@ -54,6 +58,12 @@ func (w *WindowMonitor) Start() {
 				if err := w.db.SaveWindowStats(w.lastWindow, duration); err != nil {
 					fmt.Printf("Error saving window stats: %v\n", err)
 				}
+				
+				// Show notification about the time spent on the previous window
+				if err := w.notifier.ShowWindowSwitchNotification(w.lastWindow, duration); err != nil {
+					fmt.Printf("Error showing notification: %v\n", err)
+				}
+				
 				w.lastTime = time.Now()
 			} else if w.lastWindow == "" {
 				w.lastTime = time.Now()
