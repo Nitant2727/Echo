@@ -158,7 +158,6 @@ func (wn *WindowsNotifier) showNotification(title, message string) error {
 	return nil
 }
 
-// formatDuration formats a duration in a human-readable way
 func formatDuration(d time.Duration) string {
 	if d.Hours() >= 1 {
 		hours := int(d.Hours())

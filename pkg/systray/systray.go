@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 
 	"github.com/getlantern/systray"
 	"github.com/windowmonitor/pkg/analytics"
@@ -46,21 +45,9 @@ func (tm *TrayManager) onReady() {
 		for {
 			select {
 			case <-mOpenStats.ClickedCh:
-				// Open browser to statistics page
 				fmt.Println("Opening statistics dashboard...")
-				// Open the default browser to the statistics page
 				url := "http://localhost:8080"
-				var err error
-				switch runtime.GOOS {
-				case "windows":
-					err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-				case "darwin":
-					err = exec.Command("open", url).Start()
-				case "linux":
-					err = exec.Command("xdg-open", url).Start()
-				default:
-					err = fmt.Errorf("unsupported platform")
-				}
+				err := exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 				if err != nil {
 					fmt.Printf("Failed to open browser: %v\n", err)
 				}
@@ -75,7 +62,6 @@ func (tm *TrayManager) onReady() {
 }
 
 func (tm *TrayManager) onExit() {
-	// Show summary notification before exiting
 	if err := tm.notifier.ShowSummaryNotification(); err != nil {
 		fmt.Printf("Failed to show summary notification: %v\n", err)
 	}
@@ -87,7 +73,6 @@ func (tm *TrayManager) onExit() {
 // getIcon returns a simple icon for the system tray
 func getIcon() []byte {
 	// This is a properly formatted 16x16 icon in RGBA format
-	// Each pixel is represented by 4 bytes (R,G,B,A)
 	icon := make([]byte, 16*16*4)
 	
 	// Fill with a simple blue square pattern
